@@ -1,0 +1,23 @@
+/* style.css */
+body {
+  background-color: #111;
+  color: white;
+  text-align: center;
+  padding-top: 50px;
+}
+
+.title-name{
+  font-size: 2rem;
+  color: white;
+  font-weight: bold;
+}
+
+.btn-group {
+  margin-top: 30px;
+}
+
+.status {
+  font-size: 1.5rem;
+  margin-top: 40px;
+  color: yellow;
+}

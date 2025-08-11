@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>LED + DHT11</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container py-5">
+    <h1 class="mb-4 title-name text-center">Raspberry Pi GPIO 제어 &amp; DHT11 모니터</h1>
+    <div class="text-center mb-4">
+      <a href="/on/" class="btn btn-danger btn-lg me-2">LED ON</a>
+      <a href="/off/" class="btn btn-secondary btn-lg">LED OFF</a>
+    </div>
+    <!-- LED 상태 -->
+    <p class="status text-center mb-5">
+      LED 상태: <span id="state"><strong>{{ state }}</strong></span>
+    </p>
+    <!-- 온습도 카드 -->
+    <div class="card sensor-card mx-auto">
+      <div class="card-body">
+        <h4 class="card-title mb-3">DHT11 온습도</h4>
+        <!-- 온도 -->
+        <p class="sensor-row">
+          <span class="sensor-label">온도:</span>
+          <span class="sensor-value">
+            <span id="temp" class="num">
+              {% if temperature is not none %}{{ "%.1f"|format(temperature) }}{% else %}—{% endif %}
+            </span>
+          </span>
+          <span class="sensor-unit">°C</span>
+        </p>
+        <!-- 습도 -->
+        <p class="sensor-row">
+          <span class="sensor-label">습도:</span>
+          <span class="sensor-value">
+            <span id="humi" class="num">
+              {% if humidity is not none %}{{ "%.1f"|format(humidity) }}{% else %}—{% endif %}
+            </span>
+          </span>
+          <span class="sensor-unit">%</span>
+        </p>
+
+        <small class="text-muted" id="updated">
+          {% if updated_at %}업데이트: {{ updated_at }}{% else %}&nbsp;{% endif %}
+        </small>
+      </div>
+    </div>
+  </div>
+  <!-- 3초마다 자동 갱신 -->
+  <script>
+    function refreshDHT() {
+      fetch('/api/dht')
+        .then(r => r.json())
+        .then(d => {
+          if (!d || !d.ok) return;
+          if (d.temp_c !== null && d.temp_c !== undefined) {
+            document.getElementById('temp').textContent = Number(d.temp_c).toFixed(1);
+          }
+          if (d.humidity !== null && d.humidity !== undefined) {
+            document.getElementById('humi').textContent = Number(d.humidity).toFixed(1);
+          }
+          if (d.updated_at) {
+            document.getElementById('updated').textContent = '업데이트: ' + d.updated_at;
+          }
+        })
+        .catch(() => {});
+    }
+    refreshDHT();                 // 최초 1회
+    setInterval(refreshDHT, 3000); // 3초마다 갱신
+  </script>
+</body>
+</html>
