@@ -1,0 +1,36 @@
+body { background: #111; color: #eaeaea; }
+body {
+    font-size : 2rem;
+    line-height: 1.5;
+}
+.sidebar-title {
+    font-size : 2.25rem;
+    font-weight: bold;
+    color : lightgray;
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+.btn-lg-custom{
+    font-size : 2rem;
+    padding: 0.75rem 1.5rem;
+    min-width: 120px;
+}
+.led-title{
+    font-size : 3.5rem;
+    font-weight: bold;
+    color :burlywood;
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+.led-card{
+  width: fit-content;     /* 내용 너비만큼 */
+  max-width: 100%;        /* 작은 화면에서는 넘치지 않게 */
+  margin: 0 auto;         /* 가로 가운데 */
+}
+@supports not (width: fit-content) {
+  .led-card { display: inline-block; } /* 구형 브라우저 대비 */
+}
+.list-group-item { background: #111; color: #ddd; border-color: #333; }
+.list-group-item.active { background-color: #0d6efd; border-color: #0d6efd; color: #fff; }
+.card { background: #0b0b0b; border-color: #2a2a2a; }
+.table > :not(caption) > * > * { border-color: #333; }

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="led-title">LED 제어</div>
+
+  <div class="d-flex justify-content-center">
+    <div class="card bg-dark border-secondary led-card">
+        <div class="card-body">
+            <div class="d-flex justify-content-center align-items-center gap-4">
+                <button id="btnOn"  class="btn btn-danger btn-lg-custom">LED ON</button>
+                <button id="btnOff" class="btn btn-secondary btn-lg-custom">LED OFF</button>
+                <span class="ms-3 text-secondary">상태: <strong id="ledState">{{ state }}</strong></span>
+            </div>
+        </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function setLed(state) {
+  try {
+    const res = await fetch('/api/led', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({state})
+    });
+    const j = await res.json();
+    if (j.ok) document.getElementById('ledState').textContent = j.state;
+  } catch (e) { console.error(e); }
+}
+document.getElementById('btnOn').addEventListener('click', ()=>setLed('ON'));
+document.getElementById('btnOff').addEventListener('click', ()=>setLed('OFF'));
+</script>
+{% endblock %}

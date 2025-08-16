@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2 class="led-title">측정값 보기</h2>
+
+  <div class="d-flex justify-content-center">
+    <div class="col-12 col-lg-8">
+      <div class="card bg-dark border-secondary h-100">
+        <div class="card-body">
+
+          <div class="table-responsive mt-3" style="max-height:60vh;">
+            <table class="table table-dark table-striped table-hover align-middle mb-0">
+              <thead class="table-secondary text-dark">
+                <tr>
+                  <th>시간</th>
+                  <th>온도(°C)</th>
+                  <th>습도(%)</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyHistory">
+                {% for r in rows|reverse %}
+                  <tr>
+                    <td>{{ r['ts'] }}</td>
+                    <td>
+                      {% if r['temp_c'] is number %}
+                        {{ '%.1f'|format(r['temp_c']) }}
+                      {% else %}-{% endif %}
+                    </td>
+                    <td>
+                      {% if r['humidity'] is number %}
+                        {{ '%.1f'|format(r['humidity']) }}
+                      {% else %}-{% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const AUTO_REFRESH_MS = 3000;  // 자동 갱신 주기
+
+async function refreshHistory(){
+  try{
+    const res = await fetch('/api/dht-history?n=200'); // 고정 200개
+    const j = await res.json();
+    if(!j.ok) return;
+
+    const tb = document.getElementById('tbodyHistory');
+    if (!tb) return;
+    tb.innerHTML = '';
+
+    // 최신값이 위로 오게 역순 출력
+    for(const r of j.rows.slice().reverse()){
+      const ts   = r.ts || '-';
+      const temp = (typeof r.temp_c === 'number') ? r.temp_c.toFixed(1) : '-';
+      const humi = (typeof r.humidity === 'number') ? r.humidity.toFixed(1) : '-';
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${ts}</td><td>${temp}</td><td>${humi}</td>`;
+      tb.appendChild(tr);
+    }
+  }catch(e){
+    console.error(e);
+  }
+}
+
+// 초기 실행 + 자동 반복
+refreshHistory();
+setInterval(refreshHistory, AUTO_REFRESH_MS);
+</script>
+{% endblock %}

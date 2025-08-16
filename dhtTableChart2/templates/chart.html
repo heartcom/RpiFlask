@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2 class="led-title">온습도 그래프</h2>
+  <div class="d-flex justify-content-center">
+    <div class="col-12 col-lg-10">
+      <div class="card bg-dark border-secondary">
+        <div class="card-body" style="height: 600px;"> <!-- chart 높이 -->
+          <canvas id="history-chart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+let historyChart = null;
+
+async function refreshChart(){
+  try {
+    const res = await fetch('/api/dht-history?n=50');
+    const j = await res.json();
+    if(!j.ok) return;
+
+    const labels = j.rows.map(r => r.ts);
+    const temps = j.rows.map(r => r.temp_c);
+    const humis = j.rows.map(r => r.humidity);
+
+    const ctx = document.getElementById('history-chart').getContext('2d');
+
+    // 차트 최초 생성
+    if (!historyChart) {
+      historyChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            { label: '온도(°C)', data: temps, borderColor: 'red', fill: false },
+            { label: '습도(%)', data: humis, borderColor: 'blue', fill: false }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: { 
+            legend: { 
+              display: true, 
+              labels: {
+                color: 'lightgray',
+                font: {
+                  size: 14
+                }
+              } 
+            } 
+          }
+        }
+      });
+    } else {
+      // 기존 차트 데이터 갱신
+      historyChart.data.labels = labels;
+      historyChart.data.datasets[0].data = temps;
+      historyChart.data.datasets[1].data = humis;
+      historyChart.update();
+    }
+  } catch(e) {
+    console.error(e);
+  }
+}
+
+// 최초 실행
+refreshChart();
+
+// 5초마다 자동 갱신
+setInterval(refreshChart, 5000);
+</script>
+{% endblock %}
